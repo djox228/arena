@@ -22,6 +22,15 @@
   ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--violet),var(--magenta));border-radius:6px;border:2px solid var(--surface)}
   ::-webkit-scrollbar-thumb:hover{background:var(--magenta)}
 
+  #rotate{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;align-items:center;justify-content:center;
+        gap:14px;background:radial-gradient(120% 90% at 50% 0%,rgba(36,20,54,.96) 0%,rgba(13,11,20,.98) 60%);
+        backdrop-filter:blur(6px);text-align:center;padding:24px}
+  #rotate.on{display:flex}
+  #rotate .ph{font-size:56px;animation:rot 2.4s ease-in-out infinite}
+  @keyframes rot{0%,20%{transform:rotate(0)}55%,80%{transform:rotate(-90deg)}100%{transform:rotate(-90deg)}}
+  #rotate h3{font-size:18px;font-weight:900;letter-spacing:2px}
+  #rotate p{font-size:12px;color:var(--dim);max-width:320px;line-height:1.6}
+
   #hud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:12px;right:12px;z-index:10;pointer-events:none}
   .bars{display:flex;justify-content:space-between;gap:14px;padding-right:132px}
   .barbox{width:46%}
@@ -42,7 +51,7 @@
         letter-spacing:1.2px;color:var(--amber);text-shadow:0 1px 4px #000;flex-wrap:wrap}
   #meta .shards{color:var(--cyan)}
   #meta .lvl{color:var(--dim)}
-  #topbtns{position:fixed;top:calc(8px + env(safe-area-inset-top));right:12px;z-index:26;display:flex;gap:8px}
+  #topbtns{position:fixed;top:calc(8px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));z-index:26;display:flex;gap:8px}
   .iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(25,22,39,.85);
         color:var(--ink);font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;
         backdrop-filter:blur(6px)}
@@ -128,6 +137,8 @@
   .dmg.block{color:var(--cyan);font-size:22px}
   .dmg.heal{color:var(--green);font-size:22px}
   .dmg.coin{color:var(--cyan);font-size:20px}
+  .dmg.back{color:var(--magenta);font-size:24px}
+  .dmg.miss{color:var(--dim);font-size:22px}
 
   .veil{position:fixed;inset:0;z-index:30;overflow-y:auto;
         background:radial-gradient(120% 90% at 50% 0%,rgba(36,20,54,.9) 0%,rgba(13,11,20,.95) 60%);
@@ -145,8 +156,11 @@
         background:var(--surface);color:var(--ink);cursor:pointer}
   .ghostbtn:active{transform:scale(.96)}
   .ghostbtn:disabled{opacity:.4;cursor:not-allowed}
+  .textinput{padding:11px 14px;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:14px;
+        background:rgba(13,11,20,.7);color:var(--ink);outline:none;min-width:170px;max-width:60vw}
+  .textinput:focus{border-color:var(--violet);box-shadow:0 0 12px rgba(123,47,247,.35)}
   #pct{font-size:40px;font-weight:900;color:var(--amber)}
-  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
   .seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
   .seg button{padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:1px;border:none;background:transparent;
         color:var(--dim);cursor:pointer}
@@ -219,6 +233,8 @@
 </head>
 <body>
 
+<div id="rotate"><div class="ph">📱</div><h3>ПОВЕРНИ ТЕЛЕФОН</h3><p>Арена рассчитана на горизонтальный режим — так джойстик и камера под пальцами. Разверни устройство.</p></div>
+
 <div id="hud">
   <div class="bars">
     <div class="barbox">
@@ -276,7 +292,13 @@
     <button class="ghostbtn" id="p-camp">В ЛАГЕРЬ</button>
   </div>
   <div class="sub" style="font-size:11px">WASD / джойстик слева · камера — тяни справа / мышь · колесо и щипок — зум · ⚔️ пробел · 💨 shift (кувырок) · 🧪 Q · E — действие · ESC — пауза</div>
-  <div class="soundnote">🔊 <b>Звук:</b> по умолчанию — живой синтез (удары, лязг, костёр, ветер). Хочешь настоящие записи? Положи рядом с index.html папку <b>sounds/</b> с файлами: <b>swing.ogg, hit.ogg, crit.ogg, clang.ogg, hurt.ogg, death.ogg, coin.ogg, buy.ogg, potion.ogg, wave.ogg, boss.ogg, portal.ogg, level.ogg, ui.ogg, dodge.ogg, slam.ogg, step.ogg, fire.ogg, wind.ogg, music.ogg</b> (можно .mp3 вместо .ogg). Игра подхватит их автоматически; недостающие останутся синтезированными.</div>
+  <div class="row">
+    <input class="textinput" id="repo-input" placeholder="GitHub: user/repo" spellcheck="false">
+    <input class="textinput" id="repo-tag" placeholder="тег релиза" spellcheck="false" style="min-width:120px">
+    <button class="ghostbtn" id="repo-save">ПРИМЕНИТЬ</button>
+  </div>
+  <div class="sub" id="repo-state" style="font-size:11px"></div>
+  <div class="soundnote">🌐 <b>Модели:</b> залей .glb в репозиторий по одному файлу за коммит (Add file → Upload files) — игра возьмёт их с raw.githubusercontent / jsDelivr (они отдают CORS). Релиз-ассеты — запасной канал. Звуки: папка <b>sounds/</b> или файлы в релизе: swing, hit, crit, clang, hurt, death, coin, buy, potion, wave, boss, portal, level, ui, dodge, slam, step, fire, wind, music (.ogg/.mp3/.wav).<br>👁 <b>Бой:</b> враг видит только перед собой — заходи за спину для удара <b>исподтишки</b> (x1.6). Умные стражи уклоняются кувырком от ударов, которые видят.</div>
 </div></div>
 
 <div id="shop" class="veil hidden"><div class="veil-inner">
@@ -332,11 +354,14 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 'use strict';
-/* ---------- diagnostics ---------- */
+/* ---------- diagnostics (только критичные ошибки показывают плашку) ---------- */
 const $ = id => document.getElementById(id);
 let diagShown = false;
 function fail(label, e){
   try{ console.error('[arena]', label, e); }catch(_){}
+}
+function failCritical(label, e){
+  fail(label, e);
   if (!diagShown){
     diagShown = true;
     const d = $('diag');
@@ -345,9 +370,25 @@ function fail(label, e){
   }
 }
 function safe(label, fn){ try{ return fn(); }catch(e){ fail(label, e); } }
-window.addEventListener('error', ev => fail('runtime', ev.error || ev.message));
+function safeCritical(label, fn){ try{ return fn(); }catch(e){ failCritical(label, e); } }
+window.addEventListener('error', ev => { /* не спамим плашкой — только консоль */
+  try{ console.error('[arena] window', ev.error || ev.message); }catch(_){}
+});
 
-/* ---------- utils / telegram ---------- */
+/* ---------- orientation ---------- */
+function checkOrientation(){
+  const portrait = innerHeight > innerWidth;
+  $('rotate').classList.toggle('on', portrait);
+  if (portrait && screen.orientation && screen.orientation.lock){
+    screen.orientation.lock('landscape').catch(()=>{});
+  }
+}
+checkOrientation();
+addEventListener('resize', checkOrientation);
+addEventListener('orientationchange', ()=>setTimeout(checkOrientation, 120));
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(checkOrientation, 150); });
+
+/* ---------- utils / telegram / asset sources ---------- */
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp = (a,b,t)=>a+(b-a)*t;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -356,6 +397,23 @@ if (tg){ safe('tg-init', ()=>{ tg.ready(); tg.expand(); tg.setHeaderColor && tg.
 function haptic(kind){ safe('haptic', ()=>{ if (tg && tg.HapticFeedback){ if (kind==='ok'||kind==='err') tg.HapticFeedback.notificationOccurred(kind==='ok'?'success':'error'); else tg.HapticFeedback.impactOccurred(kind); } }); }
 const TG_NAME = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || '';
 const IS_FILE = location.protocol === 'file:';
+const QS = new URLSearchParams(location.search);
+let ASSET_REPO = (QS.get('repo')||'').trim() || safe('repo-read', ()=>localStorage.getItem('arena_repo')) || '';
+ASSET_REPO = ASSET_REPO.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,'');
+if (QS.get('repo')) safe('repo-write', ()=>localStorage.setItem('arena_repo', ASSET_REPO));
+let RELEASE_TAG = (QS.get('tag')||'').trim() || safe('tag-read', ()=>localStorage.getItem('arena_tag')) || 'assets';
+if (QS.get('tag')) safe('tag-write', ()=>localStorage.setItem('arena_tag', RELEASE_TAG));
+function ghRepo(){
+  if (location.hostname.endsWith('.github.io')){
+    const user = location.hostname.split('.')[0];
+    const seg = location.pathname.split('/').filter(Boolean)[0];
+    if (user && seg) return user+'/'+seg;
+  }
+  return ASSET_REPO || '';
+}
+function rawURL(p){ const r=ghRepo(); return r ? ('https://raw.githubusercontent.com/'+r+'/main/'+p) : null; }
+function cdnURL(p){ const r=ghRepo(); return r ? ('https://cdn.jsdelivr.net/gh/'+r+'@main/'+p) : null; }
+function releaseURL(p){ const r=ghRepo(); return r ? ('https://github.com/'+r+'/releases/download/'+RELEASE_TAG+'/'+p) : null; }
 
 /* ---------- data ---------- */
 const CHARS = [
@@ -417,8 +475,9 @@ function loadMeta(){
 }
 let meta = loadMeta();
 function save(){
-  safe('save-local', ()=>localStorage.setItem('arena_meta_v3', JSON.stringify(meta)));
-  safe('save-cloud', ()=>{ if (tg && tg.CloudStorage) tg.CloudStorage.setItem('arena_meta_v3', JSON.stringify(meta), ()=>{}); });
+  try{ localStorage.setItem('arena_meta_v3', JSON.stringify(meta)); }catch(e){}
+  /* cloud storage — тихо: в боте без прав метод недоступен, это не ошибка */
+  try{ if (tg && tg.CloudStorage && tg.CloudStorage.setItem) tg.CloudStorage.setItem('arena_meta_v3', JSON.stringify(meta), ()=>{}); }catch(e){}
 }
 const levelOf = xp => 1 + Math.floor(Math.sqrt(Math.max(0,xp)/80));
 const todaySeed = ()=>{ const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); };
@@ -549,23 +608,27 @@ function setAmbience(kind){
 function loadRealSounds(){
   if (IS_FILE) return;
   let loaded=0;
+  const bases=['sounds/']; const c=cdnURL('sounds/'); if (c) bases.push(c); const rl=releaseURL('sounds/'); if (rl) bases.push(rl);
   const tryLoad=(name, isLoop)=>{
     const exts=['ogg','mp3','wav'];
-    (function at(i){
-      if (i>=exts.length) return;
-      fetch('sounds/'+name+'.'+exts[i]).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
-        .then(ab=>AC.decodeAudioData(ab))
-        .then(buf=>{
-          loaded++;
-          if (isLoop){
-            const s=AC.createBufferSource(); s.buffer=buf; s.loop=true;
-            const g=AC.createGain(); g.gain.value=0; s.connect(g); g.connect(master); s.start();
-            loopSources.push({name,gain:g,src:s});
-            realLoops[name]=buf;
-            setAmbience(mode==='camp'?'camp':ZONES[zoneIdx].props);
-          } else realSfx[name]=buf;
-          if (loaded===1) toast('Подхвачены реальные звуки из sounds/');
-        }).catch(()=>at(i+1));
+    (function atBase(b){
+      if (b>=bases.length) return;
+      (function at(i){
+        if (i>=exts.length){ atBase(b+1); return; }
+        fetch(bases[b]+name+'.'+exts[i]).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
+          .then(ab=>AC.decodeAudioData(ab))
+          .then(buf=>{
+            loaded++;
+            if (isLoop){
+              const s=AC.createBufferSource(); s.buffer=buf; s.loop=true;
+              const g=AC.createGain(); g.gain.value=0; s.connect(g); g.connect(master); s.start();
+              loopSources.push({name,gain:g,src:s});
+              realLoops[name]=buf;
+              setAmbience(mode==='camp'?'camp':ZONES[zoneIdx].props);
+            } else realSfx[name]=buf;
+            if (loaded===1) toast('Подхвачены реальные звуки');
+          }).catch(()=>at(i+1));
+      })(0);
     })(0);
   };
   SFX_NAMES.forEach(n=>tryLoad(n,false));
@@ -580,7 +643,7 @@ document.addEventListener('contextmenu', e=>e.preventDefault());
 
 /* ---------- renderer ---------- */
 let renderer=null;
-safe('webgl', ()=>{
+safeCritical('webgl', ()=>{
   renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
   renderer.setSize(innerWidth, innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -1015,7 +1078,11 @@ function fetchModel(ch){
   if (cache[ch.id]) return Promise.resolve(cache[ch.id]);
   if (loading[ch.id]) return loading[ch.id];
   if (IS_FILE || !loader) return Promise.reject(new Error('no-loader'));
-  const urls=[ch.file, 'https://grab3d.com/dl/'+ch.id+'-rigged/'+ch.id+'-rigged.glb'];
+  const urls=[ch.file];
+  const r=rawURL(ch.file); if (r) urls.push(r);
+  const c=cdnURL(ch.file); if (c) urls.push(c);
+  const rl=releaseURL(ch.file); if (rl) urls.push(rl);
+  urls.push('https://grab3d.com/dl/'+ch.id+'-rigged/'+ch.id+'-rigged.glb');
   loading[ch.id]=new Promise((res,rej)=>{
     (function at(i){ if(i>=urls.length){rej(new Error('fail'));return;}
       loader.load(urls[i], gltf=>{ gltf.scene.traverse(c=>{ if(c.isMesh){c.castShadow=true;c.frustumCulled=false;} });
@@ -1279,7 +1346,6 @@ function buildCamp(){
     const wL=mesh(GEO.plane,crowM,.5,.16,1,-.22,.05,0); const wR=mesh(GEO.plane,crowM,.5,.16,1,.22,.05,0);
     crow.add(wL); crow.add(wR); crow.userData={wL,wR};
     g.add(crow);
-    /* живые NPC: торговец и отдыхающий у костра — настоящие 3D-бойцы */
     const pi=CHARS.indexOf(CHAR);
     addCampNPC(CHARS[(pi+1)%4], 5.2, -2.2, 2.5, false, true);
     addCampNPC(CHARS[(pi+2)%4], .45, 1.5, Math.PI, true, true);
@@ -1425,10 +1491,12 @@ function spawnWave(w){
     const a=rnd()*6.283;
     enemy.position.set(Math.sin(a)*5.2, 0, Math.cos(a)*5.2);
     const hpMul=(boss?2.4:1)*(1+(w-1)*.22)*Z.mul*D.hp;
+    const dodgeBase = meta.diff==='easy'?0.06 : meta.diff==='hard'?0.30 : 0.18;
     enemy.userData={ hp:eChar.hp*hpMul, maxHp:eChar.hp*hpMul,
       dmg:(eChar.dmg[0]*.42+w*1.7)*Z.mul*(boss?1.5:1)*D.dmg,
       speed:Math.min(2.9,(1.5+w*.12)*Z.mul*.8+0.6)*(boss?.85:1),
-      state:'chase', t:0, dead:0, flash:0, guard:0, swing:-1, hitDone:false, boss, flinch:0 };
+      state:'chase', t:0, dead:0, flash:0, guard:0, swing:-1, hitDone:false, boss, flinch:0,
+      dodgeT:0, dodgeDir:{x:0,z:0}, invuln:0, dodgeChance:Math.min(.45, dodgeBase + w*.03) };
     scene.add(enemy);
     eRing=makeRing(boss?0xffb020:0xf107a3);
     $('ename').textContent=(boss?'БОСС ':'')+eChar.name+' · в.'+w;
@@ -1437,6 +1505,21 @@ function spawnWave(w){
     sfx(boss?'boss':'wave'); haptic(boss?'heavy':'light');
     updateObjective(); updateHud();
   });
+}
+
+/* ---------- vision / geometry helpers ---------- */
+function angleDot(a, b){
+  const dx=b.x-a.x, dz=b.z-a.z;
+  const l=Math.hypot(dx,dz)||1;
+  return (Math.sin(a.rotation.y)*dx + Math.cos(a.rotation.y)*dz)/l;
+}
+function enemySeesPlayer(){
+  if (!enemy || !PF) return false;
+  return angleDot(enemy, PF.root) > 0.28;   // конус обзора ~74°
+}
+function playerSeesEnemy(){
+  if (!enemy || !PF) return false;
+  return angleDot(PF.root, enemy) > 0.28;
 }
 
 /* ---------- HUD ---------- */
@@ -1484,7 +1567,7 @@ function updateObjective(){
     : ('ВОЛНА '+game.wave+'/'+(ZONES[zoneIdx].waves+1)+' · УБЕЙ СТРАЖА');
   $('hint').innerHTML = mode==='camp'
     ? 'подойди к станции и жми действие<br>костёр: сесть и получить благословение'
-    : '⚔️ удар (3 в цепочке) · 💨 кувырок = неуязвимость<br>🧪 зелье · тяни справа = камера';
+    : '⚔️ удар (3 в цепочке) · 💨 кувырок = неуязвимость<br>заходи за спину — удар исподтишки';
   $('btn-dodge').classList.toggle('hidden', mode==='camp');
   $('btn-pot').classList.toggle('hidden', mode==='camp');
   $('combo-pips').classList.toggle('hidden', mode==='camp');
@@ -1500,6 +1583,23 @@ function floater(pos,text,cls){
 
 /* ---------- combat ---------- */
 const slashes=[];
+function tryEnemyDodge(){
+  if (!enemy || enemy.userData.dead) return;
+  const u=enemy.userData;
+  if (u.state==='dodge' || u.invuln>0) return;
+  const dist=PF.root.position.distanceTo(enemy.position);
+  if (dist>3.2) return;
+  if (!enemySeesPlayer()) return;            // сзади не уклоняется — получает бэкstab
+  if (Math.random() > u.dodgeChance) return;
+  const dx=PF.root.position.x-enemy.position.x, dz=PF.root.position.z-enemy.position.z;
+  const l=Math.hypot(dx,dz)||1;
+  const side = Math.random()<.5?1:-1;
+  u.dodgeDir={ x:-dz/l*side, z:dx/l*side };
+  u.state='dodge'; u.dodgeT=.42; u.invuln=.42; u.swing=-1;
+  enemy.rotation.y=Math.atan2(u.dodgeDir.x, u.dodgeDir.z);
+  sfx('dodge');
+  burst(enemy.position.clone().add(new THREE.Vector3(0,.3,0)), 0x9a92b8, 10, 2, 1, 4, .4);
+}
 function attack(){
   if (mode==='camp'){ campSwing(); return; }
   if (!game || game.over || game.paused || game.draft || game.stun>0 || game.dodgeT>0) return;
@@ -1512,6 +1612,7 @@ function attack(){
   game.atkCd=effCd()*(game.combo===2?1.35:1);
   game.pSwing=0; game.pHitDone=false;
   sfx(game.combo===1?'swing2':'swing'); haptic('light');
+  tryEnemyDodge();
   updateHud();
 }
 let campSwingT=-1, campCombo=0, campComboT=0;
@@ -1564,7 +1665,12 @@ function resolvePlayerHit(){
   if (d>reach || dot<(combo===2?-.2:.25)) return;
   const u=enemy.userData;
   const hitPos=enemy.position.clone().add(new THREE.Vector3(0,1.3,0));
-  if (u.guard>0){
+  if (u.invuln>0){
+    floater(hitPos.clone().add(new THREE.Vector3(0,.8,0)), 'УКЛОН', 'miss');
+    return;
+  }
+  const backstab = dot < 0;   // бьём во врага со спины
+  if (u.guard>0 && !backstab){
     sfx('clang'); haptic('medium');
     burst(hitPos, 0x35d0ff, 22, 4, 2, 5, .5);
     floater(hitPos.clone().add(new THREE.Vector3(0,.8,0)), 'БЛОК', 'block');
@@ -1576,17 +1682,23 @@ function resolvePlayerHit(){
   }
   const crit=Math.random()<effCrit();
   const base=(CHAR.dmg[0]+Math.random()*(CHAR.dmg[1]-CHAR.dmg[0]))*effDmgMul();
-  const dmg=Math.round(base*(crit?2:1)*(combo===2?1.5:1));
+  let dmg=Math.round(base*(crit?2:1)*(combo===2?1.5:1));
+  if (backstab) dmg=Math.round(dmg*1.6);
   u.hp-=dmg; u.flash=.16; u.flinch=.24;
   game.comboT=.95;
-  if (game.combo===2) u.guard=.95;
+  if (game.combo===2 && !backstab) u.guard=.95;
   const kb=(combo===2?.7:.32);
   enemy.position.x+=tx/dl*kb; enemy.position.z+=tz/dl*kb;
-  burst(hitPos, crit?0xff4d5e:0xffb020, crit?34:18, crit?5:3.4, 2.4, 6, .55);
-  floater(hitPos.clone().add(new THREE.Vector3(0,.8,0)), (crit?'КРИТ −':'−')+dmg, crit?'crit':'');
-  sfx(crit?'crit':'hit'); haptic(crit?'heavy':'medium');
+  burst(hitPos, backstab?0xf107a3:(crit?0xff4d5e:0xffb020), backstab?30:(crit?34:18), backstab?4.5:(crit?5:3.4), 2.4, 6, .55);
+  if (backstab){
+    floater(hitPos.clone().add(new THREE.Vector3(0,.8,0)), 'ИСПОДТИШКИ −'+dmg, 'back');
+    sfx('crit'); haptic('heavy');
+    game.flashT=.1;
+  } else {
+    floater(hitPos.clone().add(new THREE.Vector3(0,.8,0)), (crit?'КРИТ −':'−')+dmg, crit?'crit':'');
+    sfx(crit?'crit':'hit'); haptic(crit?'heavy':'medium');
+  }
   game.freeze=.055; game.shake=Math.max(game.shake, crit?.34:.18);
-  if (crit) game.flashT=.12;
   const vamp=meta.up.vamp*2+buffs.vamp;
   if (vamp>0) game.php=Math.min(game.maxHp,game.php+vamp);
   if (u.hp<=0) killEnemy();
@@ -1784,6 +1896,28 @@ document.querySelectorAll('#shop-tabs button').forEach(b=>b.onclick=()=>{ shopTa
 document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{ meta.diff=b.dataset.d; save();
   document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',x===b)); sfx('ui'); toast('Сложность: '+b.textContent); });
 
+/* ---------- repo control ---------- */
+const repoInput=$('repo-input'), repoState=$('repo-state');
+function paintRepo(){
+  repoInput.value=ASSET_REPO;
+  repoTag.value=RELEASE_TAG;
+  const auto = location.hostname.endsWith('.github.io');
+  repoState.textContent = auto
+    ? ('Репозиторий определён автоматически: '+ghRepo()+'. Модели: raw/jsDelivr из main, затем релиз «'+RELEASE_TAG+'».')
+    : (ASSET_REPO ? ('Ассеты: '+ASSET_REPO+' (main) + релиз «'+RELEASE_TAG+'». Локальные файлы рядом с index.html приоритетны.')
+                  : 'Ассеты: локальные файлы рядом с index.html. Если их нет — впиши user/repo с .glb в корне.');
+}
+const repoTag=$('repo-tag');
+paintRepo();
+$('repo-save').onclick=()=>{
+  ASSET_REPO=repoInput.value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,'');
+  RELEASE_TAG=repoTag.value.trim()||'assets';
+  try{ localStorage.setItem('arena_repo', ASSET_REPO); localStorage.setItem('arena_tag', RELEASE_TAG); }catch(e){}
+  paintRepo(); sfx('ui');
+  toast(ASSET_REPO?('Ассеты: '+ASSET_REPO):'Ассеты: локальные файлы');
+  fetchModel(CHAR).then(src=>{ if (CHAR) setFighter(CHAR, src, true); }).catch(()=>{});
+};
+
 /* ---------- interact / sit ---------- */
 let nearStation=null;
 function updateInteract(){
@@ -1851,6 +1985,7 @@ camZone.addEventListener('pointermove', e=>{
 ['pointerup','pointercancel'].forEach(ev=>camZone.addEventListener(ev, e=>{ camPtrs.delete(e.pointerId); lastPinch=0; }));
 addEventListener('wheel', e=>{ camDist=clamp(camDist+e.deltaY*.004, 3.4, 10); }, { passive:true });
 addEventListener('keydown', e=>{
+  if (e.target && e.target.tagName==='INPUT') return;
   keys[e.code]=true; inputIdle=0;
   if (e.code==='Space'){ e.preventDefault(); attack(); }
   if (e.code==='ShiftLeft'||e.code==='ShiftRight') dodge();
@@ -2040,25 +2175,49 @@ function step(){
       const dist=Math.hypot(dx,dz);
       u.guard=Math.max(0,u.guard-raw);
       u.flinch=Math.max(0,u.flinch-raw);
+      u.invuln=Math.max(0,u.invuln-raw);
       if (u.flinch>0) enemy.rotation.x=-.22*Math.sin(u.flinch/.24*Math.PI);
       else enemy.rotation.x=lerp(enemy.rotation.x,0,Math.min(1,dt*10));
       if (u.guard>0){ u.state='guard'; EF.ctrl.set('idle'); }
       else if (u.state==='guard'){ u.state='cool'; u.t=.3; }
-      if (u.boss && u.state==='chase' && dist<4.2 && Math.random()<raw*.35){ u.state='slamwind'; u.t=.85; EF.ctrl.set('idle'); }
-      if (u.state==='chase'){
+      if (u.boss && u.state==='chase' && dist<4.2 && Math.random()<raw*.35 && enemySeesPlayer()){ u.state='slamwind'; u.t=.85; EF.ctrl.set('idle'); }
+      if (u.state==='dodge'){
+        u.dodgeT-=dt;
+        enemy.position.x+=u.dodgeDir.x*5.2*dt;
+        enemy.position.z+=u.dodgeDir.z*5.2*dt;
+        EF.ctrl.set('idle');
+        const d3=Math.hypot(enemy.position.x,enemy.position.z);
+        if (d3>6.6){ enemy.position.x*=6.6/d3; enemy.position.z*=6.6/d3; }
+        if (u.dodgeT<=0){ u.state='cool'; u.t=.5; }
+      } else if (u.state==='turn'){
+        const target=Math.atan2(dx,dz);
+        let diff=target-enemy.rotation.y;
+        while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
+        enemy.rotation.y+=diff*Math.min(1,dt*14);
+        u.t-=dt;
+        EF.ctrl.set('idle');
+        if (enemySeesPlayer() || u.t<=0){ u.state = dist>1.55?'chase':'windup'; if (u.state==='windup') u.t=.42; }
+      } else if (u.state==='chase'){
         if (dist>1.55){
-          enemy.position.x+=dx/dist*u.speed*dt;
-          enemy.position.z+=dz/dist*u.speed*dt;
-          const target=Math.atan2(dx,dz);
-          let diff=target-enemy.rotation.y;
-          while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
-          enemy.rotation.y+=diff*Math.min(1,dt*10);
-          EF.ctrl.set('run');
-          EF.locoPhase+=dt*11; EF.moveAmp=1;
-        } else { u.state='windup'; u.t=.42; EF.ctrl.set('idle'); EF.moveAmp=0; }
+          if (!enemySeesPlayer()){ u.state='turn'; u.t=1.2; }
+          else {
+            enemy.position.x+=dx/dist*u.speed*dt;
+            enemy.position.z+=dz/dist*u.speed*dt;
+            const target=Math.atan2(dx,dz);
+            let diff=target-enemy.rotation.y;
+            while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
+            enemy.rotation.y+=diff*Math.min(1,dt*10);
+            EF.ctrl.set('run');
+            EF.locoPhase+=dt*11; EF.moveAmp=1;
+          }
+        } else {
+          if (!enemySeesPlayer()){ u.state='turn'; u.t=1.2; }
+          else { u.state='windup'; u.t=.42; EF.ctrl.set('idle'); }
+        }
       } else if (u.state==='windup'){
         u.t-=dt; enemy.scale.y=(u.boss?1.35:1)*.96; EF.moveAmp=0;
-        if (u.t<=0){ u.state='strike'; u.swing=0; u.hitDone=false; enemy.scale.y=u.boss?1.35:1; }
+        if (!enemySeesPlayer()){ u.state='turn'; u.t=.8; enemy.scale.y=u.boss?1.35:1; }
+        else if (u.t<=0){ u.state='strike'; u.swing=0; u.hitDone=false; enemy.scale.y=u.boss?1.35:1; }
       } else if (u.state==='slamwind'){
         u.t-=dt; EF.moveAmp=0;
         if (eRing){ eRing.scale.setScalar(.62+(0.85-u.t)*3.2); eRing.material.opacity=.5; }
@@ -2078,11 +2237,16 @@ function step(){
         if (!u.hitDone && u.swing>=.16){
           u.hitDone=true;
           if (dist<2.05 && game.dodgeT<=0){
-            game.php-=u.dmg*buffs.def;
-            sfx('hurt'); haptic('medium'); game.shake=.4; game.hurtT=.55; game.stun=Math.max(game.stun,.18);
-            burst(PF.root.position.clone().add(new THREE.Vector3(0,1.2,0)), 0xff4d5e, 14, 3, 2, 6, .5);
-            floater(PF.root.position.clone().add(new THREE.Vector3(0,2.1,0)), '−'+Math.round(u.dmg*buffs.def), '');
-            updateHud(); if (game.php<=0) endRun(false);
+            if (enemySeesPlayer()){
+              game.php-=u.dmg*buffs.def;
+              sfx('hurt'); haptic('medium'); game.shake=.4; game.hurtT=.55; game.stun=Math.max(game.stun,.18);
+              burst(PF.root.position.clone().add(new THREE.Vector3(0,1.2,0)), 0xff4d5e, 14, 3, 2, 6, .5);
+              floater(PF.root.position.clone().add(new THREE.Vector3(0,2.1,0)), '−'+Math.round(u.dmg*buffs.def), '');
+              updateHud(); if (game.php<=0) endRun(false);
+            } else {
+              floater(enemy.position.clone().add(new THREE.Vector3(0,2.2,0)), 'МИМО', 'miss');
+              sfx('dodge');
+            }
           } else if (game.dodgeT>0){
             floater(PF.root.position.clone().add(new THREE.Vector3(0,2.1,0)), 'УКЛОН', 'block');
           }
@@ -2099,18 +2263,19 @@ function step(){
       if (eRing){
         eRing.position.x=enemy.position.x; eRing.position.z=enemy.position.z;
         if (u.state!=='slamwind'){
-          eRing.material.color.setHex(u.guard>0?0x35d0ff:(u.boss?0xffb020:0xf107a3));
+          eRing.material.color.setHex(u.invuln>0?0x9a92b8:(u.guard>0?0x35d0ff:(u.boss?0xffb020:0xf107a3)));
           eRing.scale.setScalar(u.state==='windup'?1.0:(u.guard>0?.85:.62));
           eRing.material.opacity=.35;
         }
       }
       EF.swingT=u.swing; EF.combo=1;
-      EF.guardPose=u.guard>0; EF.windPose=(u.state==='windup'||u.state==='slamwind'); EF.rollPose=false;
+      EF.guardPose=u.guard>0; EF.windPose=(u.state==='windup'||u.state==='slamwind');
+      EF.rollPose=(u.state==='dodge');
       EF.ctrl.update(dt);
       poseFighter(EF, tNow, 0);
       pushTrail(EF.trail, EF.rig.weapon, u.swing>=0&&u.swing<.34);
     } else if (EF){
-      EF.swingT=u.swing; EF.guardPose=u.guard>0; EF.windPose=false; EF.rollPose=false;
+      EF.swingT=u.swing; EF.guardPose=u.guard>0; EF.windPose=false; EF.rollPose=(u.state==='dodge');
       poseFighter(EF, tNow, 0);
       pushTrail(EF.trail, EF.rig.weapon, false);
     }
@@ -2153,7 +2318,7 @@ function step(){
 function animate(){
   requestAnimationFrame(animate);
   safe('frame', step);
-  if (renderer) safe('render', ()=>renderer.render(scene, camera));
+  if (renderer) safeCritical('render', ()=>renderer.render(scene, camera));
 }
 
 /* ---------- boot ---------- */
@@ -2161,8 +2326,8 @@ addEventListener('resize', ()=>{ safe('resize', ()=>{ camera.aspect=innerWidth/i
 document.addEventListener('visibilitychange', ()=>{ if (document.hidden && game && !game.over && !game.paused && !game.draft) togglePause(); save(); });
 
 if (renderer){
-  safe('boot-camp', buildCamp);
-  safe('boot-fighter', ()=>setFighter(CHAR, null, false));
+  safeCritical('boot-camp', buildCamp);
+  safeCritical('boot-fighter', ()=>setFighter(CHAR, null, false));
   safe('boot-hud', ()=>{ updateObjective(); updateHud(); renderFighters(); });
   toast('Лагерь Теней: подойди к Вратам, чтобы начать первую зону');
   fetchModel(CHAR).then(src=>safe('model-swap', ()=>setFighter(CHAR, src, true))).catch(()=>{});
