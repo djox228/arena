@@ -3,11 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="screen-orientation" content="landscape">
-<meta name="x5-orientation" content="landscape">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-orientation" content="landscape">
 <title>ТЕНЕВАЯ АРЕНА</title>
 <style>
   :root{
@@ -216,11 +211,7 @@
   .chip b{color:var(--cyan);font-weight:700}
   #bufflist{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:480px}
   #bufflist .chip b{color:var(--amber)}
-  .soundnote{font-size:10px;color:var(--dim);line-height:1.6;max-width:520px;text-align:left;
-        background:rgba(13,11,20,.6);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-  .soundnote b{color:var(--cyan)}
 
-  /* landscape lock overlay */
   #rotate-overlay{position:fixed;inset:0;z-index:999;background:var(--bg);display:none;
     flex-direction:column;align-items:center;justify-content:center;gap:20px;color:var(--ink);text-align:center;padding:20px}
   #rotate-overlay.show{display:flex}
@@ -303,14 +294,6 @@
     <button class="ghostbtn" id="p-restart">ПЕРЕЗАПУСК ЗОНЫ</button>
     <button class="ghostbtn" id="p-camp">В ЛАГЕРЬ</button>
   </div>
-  <div class="sub" style="font-size:11px">WASD / джойстик слева · камера — тяни справа / мышь · колесо и щипок — зум · ⚔️ пробел · 💨 shift (кувырок) · 🧪 Q · E — действие · ESC — пауза</div>
-  <div class="row">
-    <input class="textinput" id="repo-input" placeholder="GitHub: user/repo" spellcheck="false">
-    <input class="textinput" id="repo-tag" placeholder="тег релиза" spellcheck="false" style="min-width:120px">
-    <button class="ghostbtn" id="repo-save">ПРИМЕНИТЬ</button>
-  </div>
-  <div class="sub" id="repo-state" style="font-size:11px"></div>
-  <div class="soundnote">🌐 <b>Модели:</b> залей .glb в репозиторий по одному файлу за коммит (Add file → Upload files) — игра возьмёт их с raw.githubusercontent / jsDelivr. Releases браузеру напрямую не отдаёт (CORS), поэтому релиз используется как запасной канал.<br>🔊 <b>Звук:</b> по умолчанию — живой синтез. Настоящие записи: папка <b>sounds/</b> или файлы в релизе: swing, hit, crit, clang, hurt, death, coin, buy, potion, wave, boss, portal, level, ui, dodge, slam, step, fire, wind, music (.ogg/.mp3/.wav).</div>
 </div></div>
 
 <div id="shop" class="veil hidden"><div class="veil-inner">
@@ -366,7 +349,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 'use strict';
-/* ---------- diagnostics ---------- */
 const $ = id => document.getElementById(id);
 let diagShown = false;
 function fail(label, e){
@@ -381,7 +363,6 @@ function fail(label, e){
 function safe(label, fn){ try{ return fn(); }catch(e){ fail(label, e); } }
 window.addEventListener('error', ev => fail('runtime', ev.error || ev.message));
 
-/* ---------- utils / telegram / asset sources ---------- */
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp = (a,b,t)=>a+(b-a)*t;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -408,7 +389,6 @@ function releaseURL(p){ const r=ghRepo(); return r ? ('https://github.com/'+r+'/
 function cdnURL(p){ const r=ghRepo(); return r ? ('https://cdn.jsdelivr.net/gh/'+r+'@main/'+p) : null; }
 function rawURL(p){ const r=ghRepo(); return r ? ('https://raw.githubusercontent.com/'+r+'/main/'+p) : null; }
 
-/* ---------- data ---------- */
 const CHARS = [
   { id:'skeleton-warrior', name:'СКЕЛЕТ',  perk:'Баланс во всём', file:'skeleton-warrior-rigged.glb', thumb:'https://grab3d.com/m/skeleton-warrior/skeleton-warrior-3d-model.webp', hp:100, dmg:[30,40], cd:.42, speed:2.7, crit:.15, weapon:'bone',   tex:'bone', pal:{ body:0xefe6d8, accent:0xb3323a, trim:0x8a6b3f, skin:0xefe6d8 } },
   { id:'samurai',          name:'САМУРАЙ', perk:'Быстрые комбо',  file:'samurai-rigged.glb',          thumb:'https://grab3d.com/m/samurai/samurai-3d-model.webp',          hp:90,  dmg:[24,32], cd:.28, speed:3.0, crit:.15, weapon:'katana', tex:'fabric', pal:{ body:0xa8232c, accent:0xffc24d, trim:0x2b2b33, skin:0xd9b08c } },
@@ -448,7 +428,6 @@ const GIFTS = [
 ];
 const DIFFS = { easy:{hp:.75,dmg:.65}, normal:{hp:1,dmg:1}, hard:{hp:1.3,dmg:1.4} };
 
-/* ---------- save ---------- */
 const DEF_META = { shards:60, up:{dmg:0,hp:0,crit:0,regen:0,spd:0,vamp:0}, weapon:0, skin:0, skins:[0],
   potions:2, zones:[{clear:false,best:0},{clear:false,best:0},{clear:false,best:0},{clear:false,best:0}],
   xp:0, streak:0, lastDay:0, diff:'normal', muted:false, char:'skeleton-warrior', blessing:false };
@@ -469,15 +448,10 @@ function loadMeta(){
 let meta = loadMeta();
 function save(){
   safe('save-local', ()=>localStorage.setItem('arena_meta_v3', JSON.stringify(meta)));
-  // CloudStorage только в Telegram Mini App, игнорируем ошибку молча
-  if (tg && tg.CloudStorage){
-    safe('save-cloud', ()=>tg.CloudStorage.setItem('arena_meta_v3', JSON.stringify(meta), ()=>{}));
-  }
 }
 const levelOf = xp => 1 + Math.floor(Math.sqrt(Math.max(0,xp)/80));
 const todaySeed = ()=>{ const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); };
 
-/* ---------- audio ---------- */
 let AC=null, master=null, comp=null, rev=null, revGain=null, noiseBuf=null;
 let ambWindGain=null, ambDrone=null, ambDroneGain=null, ambFireGain=null;
 let muted=!!meta.muted;
@@ -636,7 +610,6 @@ sndBtn.addEventListener('pointerdown', e=>{ e.stopPropagation(); muted=!muted; m
 addEventListener('pointerdown', ()=>safe('audio-unlock', ()=>{ ac(); paintSound(); setAmbience(mode==='camp'?'camp':ZONES[zoneIdx].props); }), { once:true });
 document.addEventListener('contextmenu', e=>e.preventDefault());
 
-/* ---------- renderer ---------- */
 let renderer=null;
 safe('webgl', ()=>{
   renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
@@ -670,7 +643,6 @@ const rimB = new THREE.PointLight(0x35d0ff, .7, 24); rimB.position.set(6,2.5,-6)
 const torchA = new THREE.PointLight(0xff7a1a, 1.1, 13); scene.add(torchA);
 const torchB = new THREE.PointLight(0xff7a1a, .9, 13); scene.add(torchB);
 
-/* ---------- textures ---------- */
 function canvasTex(size, draw, repeat){
   const c=document.createElement('canvas'); c.width=c.height=size;
   draw(c.getContext('2d'), size);
@@ -794,7 +766,6 @@ function sprite(color, scale, opacity){
   const s=new THREE.Sprite(m); s.scale.setScalar(scale); return s;
 }
 
-/* ---------- shared geo / mats ---------- */
 const GEO = {
   box:new THREE.BoxGeometry(1,1,1), cyl:new THREE.CylinderGeometry(.5,.5,1,12),
   cone:new THREE.ConeGeometry(.5,1,10), sph:new THREE.SphereGeometry(.5,14,12),
@@ -814,7 +785,6 @@ function mesh(g, m, sx,sy,sz, x,y,z){
   o.receiveShadow = true; return o;
 }
 
-/* ---------- particles ---------- */
 const P_MAX=800;
 const pPos=new Float32Array(P_MAX*3), pCol=new Float32Array(P_MAX*3), pBase=new Float32Array(P_MAX*3),
       pVel=new Float32Array(P_MAX*3), pLife=new Float32Array(P_MAX), pMaxL=new Float32Array(P_MAX), pGrav=new Float32Array(P_MAX);
@@ -872,7 +842,6 @@ function updateEmbers(dt){
   emb.p.geometry.attributes.position.needsUpdate=true;
 }
 
-/* ---------- weapons ---------- */
 function buildWeapon(kind, tier){
   const g=new THREE.Group();
   const glow=[0x000000,0x102030,0x1899cc,0xf107a3][tier||0];
@@ -906,6 +875,7 @@ function buildWeapon(kind, tier){
   if (tier>=2) g.add(mesh(GEO.ico, mat('gem'+tier, glow, .1, .4, glow, 2), .09,.09,.09, 0, .18, 0));
   g.traverse(c=>{ if(c.isMesh){ c.castShadow=true; c.frustumCulled=false; } });
   g.userData.tipY = kind==='axe'?1.1:1.15*L;
+  scene.add(g);
   return g;
 }
 const TRAIL_MAX=22;
@@ -951,7 +921,6 @@ function swingEuler(combo, t){
   return { x:-1.2+ease*1.6, y:0, z:1.4-ease*2.8 };
 }
 
-/* ---------- bone posing ---------- */
 const _q1=new THREE.Quaternion(), _q2=new THREE.Quaternion(), _q3=new THREE.Quaternion();
 const _axR=new THREE.Vector3(), _axF=new THREE.Vector3(), _axU=new THREE.Vector3(0,1,0);
 function rotateBoneWorld(b, axis, angle){
@@ -1061,7 +1030,6 @@ function poseFighter(f, t, sit){
   }
 }
 
-/* ---------- fighters ---------- */
 let loader=null, draco=null;
 safe('loaders', ()=>{
   draco=new THREE.DRACOLoader();
@@ -1073,7 +1041,6 @@ function fetchModel(ch){
   if (cache[ch.id]) return Promise.resolve(cache[ch.id]);
   if (loading[ch.id]) return loading[ch.id];
   if (IS_FILE || !loader) return Promise.reject(new Error('no-loader'));
-  // Пробуем: локальный файл → raw.githubusercontent → jsDelivr → grab3d
   const urls=[ch.file];
   const r=rawURL(ch.file); if (r) urls.push(r);
   const c=cdnURL(ch.file); if (c) urls.push(c);
@@ -1192,7 +1159,6 @@ function disposeFighter(f){
   });
 }
 
-/* ---------- world ---------- */
 let worldGroup=null, zoneMats=[], zonePal=ZONES[0].pal, mode='camp', zoneIdx=0;
 const CAMP_PAL={ bg:0x0d0b14, glow:0x7b2ff7, accent:0xffb020, floor:0x2c2648, key:0xfff2df, rimA:0xf107a3, rimB:0x35d0ff };
 let stations=[], dummy=null, gate=null, fireLight=null, shafts=[], banners=[], crow=null, campNPCs=[];
@@ -1284,7 +1250,11 @@ function buildCamp(){
     fireLight=new THREE.PointLight(0xff7a1a,1.5,14); fireLight.position.set(0,1.2,0); g.add(fireLight);
     stations.push({ id:'fire', x:0, z:0, r:2.3, label:'🔥 СЕСТЬ У КОСТРА' });
     const bench=mesh(GEO.cyl,wood,.34,1.6,.34, 0,.17,1.5); bench.rotation.z=Math.PI/2; g.add(bench);
-    g.add(mesh(GEO.cone,cloth,3.2,2.6,3.2,-5.5,1.3,-4));
+    // Палатка - более округлая форма
+    const tentGeo = new THREE.ConeGeometry(3.2, 2.6, 16);
+    const tent = new THREE.Mesh(tentGeo, cloth);
+    tent.position.set(-5.5, 1.3, -4);
+    g.add(tent);
     g.add(mesh(GEO.cyl,wood,.1,3,.1,-5.5,1.5,-4));
     const stall=new THREE.Group(); stall.position.set(5.2,0,-3.4); stall.rotation.y=-.6; g.add(stall);
     stall.add(mesh(GEO.box,wood,2.6,.9,1.2,0,.45,0));
@@ -1342,8 +1312,8 @@ function buildCamp(){
     crow.add(wL); crow.add(wR); crow.userData={wL,wR};
     g.add(crow);
     const pi=CHARS.indexOf(CHAR);
-    addCampNPC(CHARS[(pi+1)%4], 5.2, -2.2, 2.5, false, true);
-    addCampNPC(CHARS[(pi+2)%4], .45, 1.5, Math.PI, true, true);
+    addCampNPC(CHARS[(pi+1)%4], 5.2, -2.2, 2.5, false, false);
+    addCampNPC(CHARS[(pi+2)%4], .45, 1.5, Math.PI, true, false);
   });
   setAmbience('camp');
 }
@@ -1398,7 +1368,6 @@ function buildZone(i){
   setAmbience(Z.props);
 }
 
-/* ---------- state ---------- */
 let CHAR=CHARS.find(c=>c.id===meta.char)||CHARS[0];
 let PF=null, EF=null, enemy=null, eRing=null, pRing=null;
 let game=null, runToken=0, idleT=0, inputIdle=0, campIdleEmote=0;
@@ -1490,7 +1459,7 @@ function spawnWave(w){
       dmg:(eChar.dmg[0]*.42+w*1.7)*Z.mul*(boss?1.5:1)*D.dmg,
       speed:Math.min(2.9,(1.5+w*.12)*Z.mul*.8+0.6)*(boss?.85:1),
       state:'chase', t:0, dead:0, flash:0, guard:0, swing:-1, hitDone:false, boss, flinch:0,
-      dodgeT:0, dodgeCd:0, turnT:0 };
+      dodgeT:0, dodgeCd:0, turnT:0, attackCd:0 };
     scene.add(enemy);
     eRing=makeRing(boss?0xffb020:0xf107a3);
     $('ename').textContent=(boss?'БОСС ':'')+eChar.name+' · в.'+w;
@@ -1501,7 +1470,6 @@ function spawnWave(w){
   });
 }
 
-/* ---------- HUD ---------- */
 const hpP=document.querySelector('#hp-player i'), hpE=document.querySelector('#hp-enemy i'),
       stB=document.querySelector('#st-bar i'), stBox=$('st-box'),
       atkBtn=$('btn-atk'), atkRing=$('atk-ring'), dodgeBtn=$('btn-dodge'), potBtn=$('btn-pot'),
@@ -1553,14 +1521,12 @@ function updateObjective(){
   $('enemy-box').classList.toggle('hidden', mode==='camp');
 }
 
-/* ---------- floaters ---------- */
 const floaters=[];
 function floater(pos,text,cls){
   const el=document.createElement('div'); el.className='dmg'+(cls?' '+cls:''); el.textContent=text;
   document.body.appendChild(el); floaters.push({el,pos:pos.clone(),t:0});
 }
 
-/* ---------- combat ---------- */
 const slashes=[];
 function attack(){
   if (mode==='camp'){ campSwing(); return; }
@@ -1625,14 +1591,12 @@ function resolvePlayerHit(){
   const dot=(fx*tx+fz*tz)/dl;
   if (d>reach || dot<(combo===2?-.2:.25)) return;
   const u=enemy.userData;
-  // Враг уворачивается с шансом 25% (боссы — 15%)
   const dodgeChance = u.boss ? .15 : .25;
   if (u.dodgeT<=0 && Math.random()<dodgeChance){
     u.dodgeT=.6;
     burst(enemy.position.clone().add(new THREE.Vector3(0,1,0)), 0x35d0ff, 14, 2.5, 1.5, 4, .5);
     floater(enemy.position.clone().add(new THREE.Vector3(0,2.2,0)), 'УКЛОН', 'dodge');
     sfx('dodge');
-    // Отскок назад
     enemy.position.x -= tx/dl*1.2;
     enemy.position.z -= tz/dl*1.2;
     return;
@@ -1744,7 +1708,6 @@ function openDraft(){
   $('draft').classList.remove('hidden');
 }
 
-/* ---------- panels ---------- */
 function closeAllPanels(){ ['shop','map','fighters','pause','draft','end','overlay'].forEach(id=>$(id).classList.add('hidden')); }
 function anyPanelOpen(){ return ['shop','map','fighters','pause','draft','end','overlay'].some(id=>!$(id).classList.contains('hidden')); }
 let shopTab='up';
@@ -1858,27 +1821,6 @@ document.querySelectorAll('#shop-tabs button').forEach(b=>b.onclick=()=>{ shopTa
 document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{ meta.diff=b.dataset.d; save();
   document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',x===b)); sfx('ui'); toast('Сложность: '+b.textContent); });
 
-/* ---------- repo control ---------- */
-const repoInput=$('repo-input'), repoTag=$('repo-tag'), repoState=$('repo-state');
-function paintRepo(){
-  repoInput.value=ASSET_REPO;
-  repoTag.value=RELEASE_TAG;
-  const r=ghRepo();
-  repoState.textContent = r
-    ? ('Репозиторий: '+r+' · тег: '+RELEASE_TAG+' · модели тянутся с raw.githubusercontent / jsDelivr')
-    : 'Ассеты: локальные файлы рядом с index.html. Если хост их не отдаёт — впиши user/repo публичного GitHub-репозитория.';
-}
-paintRepo();
-$('repo-save').onclick=()=>{
-  ASSET_REPO=repoInput.value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,'');
-  RELEASE_TAG=repoTag.value.trim()||'assets';
-  safe('repo-save', ()=>{ localStorage.setItem('arena_repo', ASSET_REPO); localStorage.setItem('arena_tag', RELEASE_TAG); });
-  paintRepo(); sfx('ui');
-  toast(ASSET_REPO?('Ассеты: '+ASSET_REPO+'@'+RELEASE_TAG):'Ассеты: локальные файлы');
-  fetchModel(CHAR).then(src=>{ if (CHAR) setFighter(CHAR, src, true); }).catch(()=>{});
-};
-
-/* ---------- interact / sit ---------- */
 let nearStation=null;
 function updateInteract(){
   const btn=$('btn-interact');
@@ -1910,7 +1852,6 @@ function interact(){
 }
 $('btn-interact').addEventListener('pointerdown', e=>{ e.stopPropagation(); interact(); });
 
-/* ---------- input ---------- */
 const zoneEl=$('stick-zone'), base=$('stick-base'), knob=$('stick-knob');
 let stickId=null, sc=null;
 zoneEl.addEventListener('pointerdown', e=>{ stickId=e.pointerId; sc={x:e.clientX,y:e.clientY};
@@ -1958,7 +1899,6 @@ atkBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); e.stopPropagatio
 dodgeBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); e.stopPropagation(); dodge(); });
 potBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); e.stopPropagation(); potion(); });
 
-/* ---------- loop ---------- */
 const clock=new THREE.Clock();
 const _v=new THREE.Vector3();
 function step(){
@@ -2013,7 +1953,6 @@ function step(){
     if (Math.random()<raw*2) burst(new THREE.Vector3(0,.8,0), 0xff7a1a, 2, 1, 1.5, 1, .6);
   }
 
-  /* ---- player ---- */
   if (PF){
     const root=PF.root;
     inputIdle+=raw;
@@ -2115,7 +2054,6 @@ function step(){
     updateHud();
   }
 
-  /* ---- enemy AI ---- */
   if (enemy && game){
     const u=enemy.userData;
     if (u.dead){
@@ -2138,6 +2076,7 @@ function step(){
       u.dodgeT=Math.max(0,u.dodgeT-raw);
       u.dodgeCd=Math.max(0,u.dodgeCd-raw);
       u.turnT=Math.max(0,u.turnT-raw);
+      u.attackCd=Math.max(0,u.attackCd-raw);
       if (u.flinch>0) enemy.rotation.x=-.22*Math.sin(u.flinch/.24*Math.PI);
       else enemy.rotation.x=lerp(enemy.rotation.x,0,Math.min(1,dt*10));
       if (u.guard>0){ u.state='guard'; EF.ctrl.set('idle'); }
@@ -2145,7 +2084,6 @@ function step(){
       if (u.boss && u.state==='chase' && dist<4.2 && Math.random()<raw*.35){ u.state='slamwind'; u.t=.85; EF.ctrl.set('idle'); }
       if (u.state==='chase'){
         if (dist>1.55){
-          // Поворачиваемся к игроку перед движением
           const target=Math.atan2(dx,dz);
           let diff=target-enemy.rotation.y;
           while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
@@ -2157,18 +2095,16 @@ function step(){
         } else { u.state='windup'; u.t=.42; EF.ctrl.set('idle'); EF.moveAmp=0; }
       } else if (u.state==='windup'){
         u.t-=dt; enemy.scale.y=(u.boss?1.35:1)*.96; EF.moveAmp=0;
-        // Проверяем: игрок впереди? (угол < 120°)
         const fx=Math.sin(enemy.rotation.y), fz=Math.cos(enemy.rotation.y);
         const tx=PF.root.position.x-enemy.position.x, tz=PF.root.position.z-enemy.position.z;
         const dl=Math.hypot(tx,tz)||1;
         const dot=(fx*tx+fz*tz)/dl;
         if (dot<.3){
-          // Игрок за спиной — поворачиваемся
           const target=Math.atan2(tx,tz);
           let diff=target-enemy.rotation.y;
           while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
           enemy.rotation.y+=diff*Math.min(1,dt*8);
-          u.t+=raw; // продлеваем windup
+          u.t+=raw;
         } else if (u.t<=0){
           u.state='strike'; u.swing=0; u.hitDone=false; enemy.scale.y=u.boss?1.35:1;
         }
@@ -2190,7 +2126,6 @@ function step(){
         u.swing+=dt; EF.moveAmp=0;
         if (!u.hitDone && u.swing>=.16){
           u.hitDone=true;
-          // Проверяем: игрок впереди?
           const fx=Math.sin(enemy.rotation.y), fz=Math.cos(enemy.rotation.y);
           const tx=PF.root.position.x-enemy.position.x, tz=PF.root.position.z-enemy.position.z;
           const dl=Math.hypot(tx,tz)||1;
@@ -2204,7 +2139,6 @@ function step(){
           } else if (game.dodgeT>0){
             floater(PF.root.position.clone().add(new THREE.Vector3(0,2.1,0)), 'УКЛОН', 'block');
           } else if (dot<=.3){
-            // Промах — игрок за спиной
             floater(enemy.position.clone().add(new THREE.Vector3(0,2.2,0)), 'ПРОМАХ', 'block');
           }
         }
@@ -2277,7 +2211,6 @@ function animate(){
   if (renderer) safe('render', ()=>renderer.render(scene, camera));
 }
 
-/* ---------- boot ---------- */
 addEventListener('resize', ()=>{ safe('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); if (renderer) renderer.setSize(innerWidth,innerHeight); }); });
 document.addEventListener('visibilitychange', ()=>{ if (document.hidden && game && !game.over && !game.paused && !game.draft) togglePause(); save(); });
 
